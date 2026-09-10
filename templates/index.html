@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Giám sát phòng thi thông minh | SMART PROCTORING AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ================= HEADER ================= */
+        header {
+            background: #111726;
+            border-bottom: 1px solid #1e293b;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+
+        .brand-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .brand-title h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #f8fafc;
+        }
+
+        .brand-title span {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: #38bdf8;
+            text-transform: uppercase;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1e293b;
+            padding: 6px 14px 6px 8px;
+            border-radius: 30px;
+            border: 1px solid #334155;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #0284c7;
+            color: white;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .user-info {
+            line-height: 1.2;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ================= MAIN LAYOUT ================= */
+        main {
+            flex: 1;
+            padding: 20px 28px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 480px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1180px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ================= LEFT COLUMN ================= */
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .camera-card {
+            background: #111726;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            aspect-ratio: 4/3;
+            max-height: 520px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .camera-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Camera card header */
+        .camera-card-header {
+            padding: 10px 16px;
+            background: #161f33;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tag-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .badge-room {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+        }
+
+        .badge-timer {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            color: #cbd5e1;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Camera bottom control floating bar */
+        .camera-controls {
+            padding: 12px 20px;
+            background: #111726;
+            border-top: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #334155;
+        }
+
+        .btn-success {
+            background: #059669;
+            border-color: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            border-color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            border: 1px solid #1e293b;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        .status-dot.paused {
+            background: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+
+        /* Bottom stats row */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 240px;
+            gap: 16px;
+        }
+
+        .info-card {
+            background: #111726;
+            border: 1px solid #1e293b;
+            border-radius: 14px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .info-card .label {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .info-card .value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-top: 4px;
+        }
+
+        .violation-counter-card {
+            background: linear-gradient(145deg, #1e1b4b, #111726);
+            border: 1px solid #4338ca;
+            border-radius: 14px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .violation-counter-card .title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .violation-counter-card .count {
+            font-size: 32px;
+            font-weight: 800;
+            color: #fbbf24;
+            line-height: 1;
+        }
+
+        /* ================= RIGHT COLUMN (SNAPSHOTS) ================= */
+        .right-col {
+            background: #111726;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            max-height: 640px;
+        }
+
+        .snapshots-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #1e293b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #161f33;
+        }
+
+        .snapshots-header h2 {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #f8fafc;
+        }
+
+        .snapshots-header h2 svg {
+            width: 18px;
+            height: 18px;
+            fill: #38bdf8;
+        }
+
+        .btn-clear {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-clear:hover {
+            background: #334155;
+            color: #f8fafc;
+        }
+
+        .snapshots-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            align-content: start;
+        }
+
+        .snapshots-list::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .snapshots-list::-webkit-scrollbar-track {
+            background: #0d1322;
+            border-radius: 4px;
+        }
+
+        .snapshots-list::-webkit-scrollbar-thumb {
+            background: #25334d;
+            border-radius: 4px;
+        }
+
+        .snapshots-list::-webkit-scrollbar-thumb:hover {
+            background: #3b82f6;
+        }
+
+        .snapshot-card {
+            background: #162035;
+            border: 1px solid #23304a;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .snapshot-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            box-shadow: 0 6px 16px rgba(56, 189, 248, 0.25);
+        }
+
+        .snapshot-img-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #090d16;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .snapshot-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .snapshot-card:hover .snapshot-img-container img {
+            transform: scale(1.05);
+        }
+
+        .snapshot-tag {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            background: rgba(225, 29, 72, 0.9);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .snapshot-tag.phone {
+            background: rgba(239, 68, 68, 0.95);
+        }
+
+        .snapshot-tag.pose {
+            background: rgba(245, 158, 11, 0.95);
+        }
+
+        .snapshot-tag.face {
+            background: rgba(217, 70, 239, 0.95);
+        }
+
+        .snapshot-info {
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: #111726;
+            border-top: 1px solid #1e293b;
+        }
+
+        .snapshot-type {
+            font-size: 11px;
+            font-weight: 600;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .snapshot-meta {
+            font-size: 10px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .snapshot-meta .duration-badge {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 9px;
+        }
+
+        .empty-snapshots {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 260px;
+            color: #64748b;
+            text-align: center;
+            padding: 20px;
+            gap: 10px;
+        }
+
+        .empty-snapshots svg {
+            width: 48px;
+            height: 48px;
+            fill: #334155;
+        }
+
+        /* ================= MODAL ================= */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #111726;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            max-height: 540px;
+            object-fit: contain;
+            background: #000;
+            display: block;
+        }
+
+        .modal-details {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand-group">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+            </div>
+            <div class="brand-title">
+                <h1>Hệ thống Giám sát phòng thi thông minh</h1>
+                <span>SMART PROCTORING AI - SAMSUNG INNOVATION CAMPUS</span>
+            </div>
+        </div>
+
+        <div class="user-panel">
+            <div class="user-badge">
+                <div class="avatar">GV</div>
+                <div class="user-info">
+                    <div class="user-name">Hội đồng Giám thị Samsung SIC</div>
+                    <div class="user-role">Trưởng ban khảo thí</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Cột Trái: Camera Feed & Thống kê -->
+        <div class="left-col">
+            <div class="camera-card">
+                <!-- Thanh tiêu đề đặt riêng phía trên camera, hoàn toàn không đè lên hình ảnh -->
+                <div class="camera-card-header">
+                    <div class="tag-group">
+                        <span class="badge-room">LAB 1 - PHÒNG MÁY SIC</span>
+                        <span class="badge-room" style="color: #cbd5e1; border-color: #475569;">Môn: Lập trình AI</span>
+                    </div>
+                    <span class="badge-timer" id="clock">00:00:00</span>
+                </div>
+
+                <div class="camera-wrapper">
+                    <!-- Video Feed MJPEG -->
+                    <img id="videoFeed" src="/video_feed" alt="Đang kết nối camera...">
+                </div>
+
+                <!-- Cụm nút điều khiển (đã bỏ icon loa) -->
+                <div class="camera-controls">
+                    <div class="btn-group">
+                        <button class="btn btn-success" id="btnToggleRun">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            <span id="btnRunText">Tạm dừng</span>
+                        </button>
+                    </div>
+
+                    <div class="status-pill">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">STATUS: RUNNING</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hàng thông tin & Bộ đếm -->
+            <div class="bottom-row">
+                <div class="info-card">
+                    <div>
+                        <div class="label">MÔ TẢ GIÁM SÁT</div>
+                        <div class="value">Phát hiện: Điện thoại, Máy tính, Góc quay đầu & Che mặt</div>
+                    </div>
+                    <div>
+                        <div class="label">ĐỘ PHÂN GIẢI</div>
+                        <div class="value">640 x 480 @ 30 FPS</div>
+                    </div>
+                </div>
+
+                <div class="violation-counter-card">
+                    <div>
+                        <div class="title">TỔNG VI PHẠM</div>
+                        <div style="font-size: 11px; color: #cbd5e1; margin-top: 2px;">VIOLATIONS</div>
+                    </div>
+                    <div class="count" id="totalViolationsCount">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột Phải: Snapshots vi phạm -->
+        <div class="right-col">
+            <div class="snapshots-header">
+                <h2>
+                    <svg viewBox="0 0 24 24"><path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+                    Snapshots
+                </h2>
+                <button class="btn-clear" id="btnClearSnapshots">Clear</button>
+            </div>
+
+            <div class="snapshots-list" id="snapshotsContainer">
+                <div class="empty-snapshots">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                    <p>Chưa có vi phạm nào.<br>Hệ thống đang quan sát phòng thi.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Xem Chi Tiết Snapshot -->
+    <div class="modal" id="imageModal">
+        <div class="modal-content">
+            <div class="modal-close" id="modalClose">&times;</div>
+            <img id="modalImg" src="" alt="Snapshot Full">
+            <div class="modal-details">
+                <div>
+                    <h3 id="modalType" style="font-size: 15px; color: #f8fafc;">Loại vi phạm</h3>
+                    <p id="modalTime" style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Thời gian</p>
+                </div>
+                <span id="modalDuration" style="background: #dc2626; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 12px;">2.5s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script tương tác -->
+    <script>
+        // Đồng hồ thời gian thực
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Trạng thái nút Tạm dừng / Tiếp tục
+        let isRunning = true;
+        const btnToggleRun = document.getElementById('btnToggleRun');
+        const btnRunText = document.getElementById('btnRunText');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        btnToggleRun.addEventListener('click', async () => {
+            try {
+                const res = await fetch('/api/toggle_stream', { method: 'POST' });
+                const data = await res.json();
+                isRunning = data.is_running;
+
+                if (isRunning) {
+                    btnRunText.innerText = 'Tạm dừng';
+                    btnToggleRun.className = 'btn btn-success';
+                    statusDot.className = 'status-dot';
+                    statusText.innerText = 'STATUS: RUNNING';
+                } else {
+                    btnRunText.innerText = 'Tiếp tục';
+                    btnToggleRun.className = 'btn btn-danger';
+                    statusDot.className = 'status-dot paused';
+                    statusText.innerText = 'STATUS: PAUSED';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // Xóa danh sách Snapshots
+        const btnClear = document.getElementById('btnClearSnapshots');
+        btnClear.addEventListener('click', async () => {
+            try {
+                await fetch('/api/clear', { method: 'POST' });
+                loadSnapshots();
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // Polling lấy Snapshots vi phạm từ server
+        let lastSeenId = 0;
+        const snapshotsContainer = document.getElementById('snapshotsContainer');
+        const totalViolationsCount = document.getElementById('totalViolationsCount');
+
+        async function loadSnapshots() {
+            try {
+                const res = await fetch('/api/snapshots');
+                const data = await res.json();
+                const list = data.snapshots;
+                totalViolationsCount.innerText = data.stats.total_violations;
+
+                if (!list || list.length === 0) {
+                    snapshotsContainer.innerHTML = `
+                        <div class="empty-snapshots">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            <p>Chưa có vi phạm nào.<br>Hệ thống đang quan sát phòng thi.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render danh sách thẻ snapshots
+                let html = '';
+                list.forEach(item => {
+                    let tagClass = 'pose';
+                    if (item.type.includes('DIEN THOAI') || item.type.includes('ĐIỆN THOẠI')) tagClass = 'phone';
+                    else if (item.type.includes('Mat mat') || item.type.includes('Mất mặt')) tagClass = 'face';
+
+                    html += `
+                        <div class="snapshot-card" onclick="openModal('${item.image_url}', '${item.type}', '${item.time}', '${item.duration}')">
+                            <div class="snapshot-img-container">
+                                <img src="${item.image_url}" alt="${item.type}" loading="lazy">
+                                <span class="snapshot-tag ${tagClass}">${item.type}</span>
+                            </div>
+                            <div class="snapshot-info">
+                                <span class="snapshot-type" title="${item.type}">${item.type}</span>
+                                <div class="snapshot-meta">
+                                    <span>${item.time}</span>
+                                    <span class="duration-badge">${item.duration}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                snapshotsContainer.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Tự động cập nhật snapshots mỗi 1 giây
+        setInterval(loadSnapshots, 1000);
+        loadSnapshots();
+
+        // Modal xem ảnh lớn
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImg');
+        const modalType = document.getElementById('modalType');
+        const modalTime = document.getElementById('modalTime');
+        const modalDuration = document.getElementById('modalDuration');
+        const modalClose = document.getElementById('modalClose');
+
+        function openModal(imgUrl, type, time, duration) {
+            modalImg.src = imgUrl;
+            modalType.innerText = type;
+            modalTime.innerText = `Thời điểm ghi nhận: ${time}`;
+            modalDuration.innerText = duration;
+            modal.classList.add('active');
+        }
+
+        modalClose.addEventListener('click', () => modal.classList.remove('active'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

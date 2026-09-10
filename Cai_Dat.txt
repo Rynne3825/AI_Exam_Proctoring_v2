@@ -1,0 +1,7 @@
+Cài đặt máy ảo bằng conda
+Lệnh:
+conda create -n proctoring_env python=3.10
+conda activate proctoring_env
+
+Cài đặt thư viện bằng lệnh:
+pip install -r requirements.txt
