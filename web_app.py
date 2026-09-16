@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -11,14 +14,16 @@ from threading import Lock
 from PIL import Image, ImageDraw, ImageFont
 from ultralytics import YOLO
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 # ==================== 1. CẤU HÌNH HỆ THỐNG ====================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SCREENSHOTS_DIR = os.path.join(BASE_DIR, "screenshots")
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
+os.makedirs(LOGS_DIR, exist_ok=True)
 
 # Ngưỡng thời gian vi phạm (giây)
 VIOLATION_THRESHOLD = 2.0   # Cảnh báo khi quay đầu hoặc dùng điện thoại liên tục > 2s
@@ -67,11 +72,6 @@ face_mesh = mp.solutions.face_mesh.FaceMesh(
     min_tracking_confidence=0.5
 )
 print("✅ Tải mô hình hoàn tất!")
-
-# File nhật ký CSV
-log_filename = os.path.join(BASE_DIR, f"violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
-with open(log_filename, 'w', newline='', encoding='utf-8') as f:
-    csv.writer(f).writerow(['Thời gian', 'Loại vi phạm', 'Thời gian kéo dài (giây)', 'File ảnh'])
 
 # ==================== 3. QUẢN LÝ TRẠNG THÁI (THREAD-SAFE) ====================
 state_lock = Lock()
@@ -196,8 +196,14 @@ def save_snapshot(violation_type, duration, frame):
     abs_path = os.path.join(SCREENSHOTS_DIR, file_name)
     cv2.imwrite(abs_path, frame)
 
-    with open(log_filename, 'a', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerow([now_dt.strftime("%Y-%m-%d %H:%M:%S"), violation_type, f"{duration:.2f}", file_name])
+    # Ghi log CSV vào thư mục logs/ với encoding 'utf-8-sig' để Excel mở ra 100% chuẩn tiếng Việt
+    csv_file = os.path.join(LOGS_DIR, f"violations_{now_dt.strftime('%Y%m%d')}.csv")
+    file_exists = os.path.exists(csv_file)
+    with open(csv_file, 'a', newline='', encoding='utf-8-sig') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(['Thời gian', 'Loại vi phạm', 'Thời gian kéo dài (giây)', 'File ảnh'])
+        writer.writerow([now_dt.strftime("%Y-%m-%d %H:%M:%S"), violation_type, f"{duration:.2f}", file_name])
 
     with state_lock:
         stats["total_violations"] += 1
@@ -392,6 +398,16 @@ def toggle_stream():
         stats["is_running"] = not stats["is_running"]
         current_state = stats["is_running"]
     return JSONResponse(content={"status": "success", "is_running": current_state})
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return Response(status_code=204)
+
+
+@app.get("/api/auth/status")
+def auth_status():
+    return JSONResponse(content={"authenticated": True, "role": "admin"})
 
 
 if __name__ == "__main__":

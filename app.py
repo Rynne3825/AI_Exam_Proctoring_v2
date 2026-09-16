@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -8,6 +11,11 @@ from datetime import datetime
 from ultralytics import YOLO
 
 # ==================== CẤU HÌNH ====================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
+os.makedirs(LOGS_DIR, exist_ok=True)
+os.makedirs(os.path.join(BASE_DIR, "screenshots"), exist_ok=True)
+
 VIOLATION_THRESHOLD = 2.0   # Giây vi phạm liên tục trước khi cảnh báo
 NO_FACE_THRESHOLD = 3.0     # Giây mất mặt trước khi cảnh báo
 YAW_THRESHOLD = 25          # Quay hẳn ra sau (độ)
@@ -39,21 +47,24 @@ if not cap.isOpened():
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_W)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_H)
 
-os.makedirs("screenshots", exist_ok=True)
-log_filename = f"violations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-with open(log_filename, 'w', newline='', encoding='utf-8') as f:
-    csv.writer(f).writerow(['Thời gian', 'Loại vi phạm', 'Thời gian kéo dài (giây)', 'Ảnh chụp'])
-
-
 # ==================== CÁC HÀM XỬ LÝ ====================
 def log_violation(violation_type, duration, frame):
     """Ghi vi phạm vào file CSV và lưu ảnh chụp bằng chứng."""
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    img_path = f"screenshots/{timestamp.replace(':', '-')}.jpg"
+    now_dt = datetime.now()
+    timestamp = now_dt.strftime("%Y-%m-%d %H:%M:%S")
+    img_name = f"{timestamp.replace(':', '-')}.jpg"
+    img_path = os.path.join(BASE_DIR, "screenshots", img_name)
     cv2.imwrite(img_path, frame)
-    with open(log_filename, 'a', newline='', encoding='utf-8') as f:
-        csv.writer(f).writerow([timestamp, violation_type, f"{duration:.2f}", img_path])
+
+    csv_file = os.path.join(LOGS_DIR, f"violations_{now_dt.strftime('%Y%m%d')}.csv")
+    file_exists = os.path.exists(csv_file)
+    with open(csv_file, 'a', newline='', encoding='utf-8-sig') as f:
+        writer = csv.writer(f)
+        if not file_exists:
+            writer.writerow(['Thời gian', 'Loại vi phạm', 'Thời gian kéo dài (giây)', 'Ảnh chụp'])
+        writer.writerow([timestamp, violation_type, f"{duration:.2f}", img_name])
     print(f"📝 Log: {timestamp} - {violation_type} ({duration:.2f}s)")
+
 
 
 def get_head_pose(landmarks):
